@@ -32,8 +32,13 @@ func bail(err error) {
 	}
 }
 
+var Version string
+
 func main() {
 	var opts struct {
+		Help    bool `cli:"-h, --help"`
+		Version bool `cli:"-v, --version"`
+
 		Index string `cli:"-i, --index"`
 		Topic string `cli:"-t, --topic"`
 		Root  string `cli:"-r, --root"`
@@ -41,6 +46,27 @@ func main() {
 
 	_, args, err := cli.Parse(&opts)
 	bail(err)
+
+	if opts.Help {
+		fmt.Printf("USAGE: @Y{runbook} -i index.tpl -t topic.tpl -r output/dir/ path/to/toc.yml\n")
+		fmt.Printf("\n")
+		fmt.Printf("OPTIONS:\n")
+		fmt.Printf("  -h, --help      Show this help screen.\n")
+		fmt.Printf("  -v, --version   Print the version and exit.\n")
+		fmt.Printf("  -i, --index     Path to the template for the index page.\n")
+		fmt.Printf("  -t, --topic     Path to the template for the topic page.\n")
+		fmt.Printf("  -r, --root      Where to put the resulting HTML files.\n")
+		os.Exit(0)
+	}
+
+	if opts.Version {
+		if Version == "" {
+			fmt.Printf("runbook (development version)\n")
+		} else {
+			fmt.Printf("runbook v%s\n", Version)
+		}
+		os.Exit(0)
+	}
 
 	if len(args) != 1 || opts.Index == "" || opts.Topic == "" || opts.Root == "" {
 		fmt.Fprintf(os.Stderr, "USAGE: @Y{runbook} -i index.tpl -t topic.tpl -r output/dir/ path/to/toc.yml\n")
